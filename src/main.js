@@ -1,4 +1,4 @@
-import cron, { schedule } from 'node-cron'
+import cron from 'node-cron'
 import crawler from './crawler.js'
 
 const expression = process.env.CRON_EXPRESSION || '* * * * *'
