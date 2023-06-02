@@ -9,6 +9,9 @@ const crawler = new PlaywrightCrawler({
     const title = await page.title()
     log.info(`Processing '${title}'...`)
 
+    // one big set of data
+    const dataset = {}
+
     // wait for the title to be available
     await page.waitForSelector('#title')
 
@@ -21,33 +24,54 @@ const crawler = new PlaywrightCrawler({
       // wait for the appointment status to be available
       await page.waitForSelector('#appointmentStatus')
       const trs = await page.locator('tbody > tr').all()
-
       // remove the first row (th)
       trs.shift()
 
-      console.log(label)
+      const officeQuota = []
 
       for (const tr of trs) {
         let [date, quotaR, quotaK] = await tr.locator('td').all()
         date = await date.textContent()
-        quotaR = await quotaR
-          .locator('[class^="quota-"]')
-          .evaluate((node) => window.getComputedStyle(node, ':after').content)
-        quotaK = await quotaK
-          .locator('[class^="quota-"]')
-          .evaluate((node) => window.getComputedStyle(node, ':after').content)
-        console.log(date, quotaR, quotaK)
+        quotaR = await quotaR.locator('[class^="quota-"]')
+        quotaK = await quotaK.locator('[class^="quota-"]')
+
+        const quotaRClass = await quotaR.getAttribute('class')
+        const quotaKClass = await quotaK.getAttribute('class')
+
+        if (['quota-y', 'quota-g'].includes(quotaRClass)) {
+          const content = await quotaR.evaluate(
+            (node) => window.getComputedStyle(node, ':after').content
+          )
+
+          officeQuota.push({
+            date,
+            type: 'R',
+            content,
+          })
+        }
+
+        if (['quota-y', 'quota-g'].includes(quotaKClass)) {
+          const content = await quotaK.evaluate(
+            (node) => window.getComputedStyle(node, ':after').content
+          )
+
+          officeQuota.push({
+            date,
+            type: 'K',
+            content,
+          })
+        }
       }
+
+      dataset[label] = officeQuota
     }
 
     // Save results as JSON to ./storage/datasets/default
-    await Dataset.pushData({ title, url: request.loadedUrl })
+    await Dataset.pushData({ title, url: request.loadedUrl, dataset })
   },
   // Uncomment this option to see the browser window.
   // headless: false,
 })
 
 // Add first URL to the queue and start the crawl.
-await crawler.run([
-  'https://eservices.es2.immd.gov.hk/es/quota-enquiry-client/?l=zh-CN',
-])
+await crawler.run(['https://eservices.es2.immd.gov.hk/es/quota-enquiry-client'])
