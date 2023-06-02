@@ -5,6 +5,8 @@
   "description": "Hard to find a spot, so I built this.",
   "dependencies": {
     "crawlee": "^3.0.0",
+    "dayjs": "^1.11.7",
+    "node-cron": "^3.0.2",
     "playwright": "*"
   },
   "scripts": {
