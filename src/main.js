@@ -5,16 +5,37 @@ import { PlaywrightCrawler, Dataset } from 'crawlee'
 // browser controlled by the Playwright library.
 const crawler = new PlaywrightCrawler({
   // Use the requestHandler to process each of the crawled pages.
-  async requestHandler({ request, page, enqueueLinks, log }) {
+  async requestHandler({ request, page, log }) {
     const title = await page.title()
-    log.info(`Title of ${request.loadedUrl} is '${title}'`)
+    log.info(`Processing '${title}'...`)
+
+    // wait for the title to be available
+    await page.waitForSelector('#title')
+
+    // select the option one by one
+    const select = await page.locator('select')
+    for (const option of await select.locator('option').all()) {
+      const label = await option.textContent()
+      await select.selectOption({ label })
+
+      // wait for the appointment status to be available
+      await page.waitForSelector('#appointmentStatus')
+      const trs = await page.locator('tbody > tr').all()
+
+      // remove the first row (th)
+      trs.shift()
+
+      for (const tr of trs) {
+        let [date, quotaR, quotaK] = await tr.locator('td').all()
+        date = await date.textContent()
+        // TODO: how to get the textContent of the element?
+        quotaR = await quotaR.locator('.quota-r').textContent()
+        console.log(date, quotaR)
+      }
+    }
 
     // Save results as JSON to ./storage/datasets/default
     await Dataset.pushData({ title, url: request.loadedUrl })
-
-    // Extract links from the current page
-    // and add them to the crawling queue.
-    await enqueueLinks()
   },
   // Uncomment this option to see the browser window.
   // headless: false,
