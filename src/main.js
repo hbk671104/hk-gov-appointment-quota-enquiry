@@ -25,12 +25,18 @@ const crawler = new PlaywrightCrawler({
       // remove the first row (th)
       trs.shift()
 
+      console.log(label)
+
       for (const tr of trs) {
         let [date, quotaR, quotaK] = await tr.locator('td').all()
         date = await date.textContent()
-        // TODO: how to get the textContent of the element?
-        quotaR = await quotaR.locator('.quota-r').textContent()
-        console.log(date, quotaR)
+        quotaR = await quotaR
+          .locator('[class^="quota-"]')
+          .evaluate((node) => window.getComputedStyle(node, ':after').content)
+        quotaK = await quotaK
+          .locator('[class^="quota-"]')
+          .evaluate((node) => window.getComputedStyle(node, ':after').content)
+        console.log(date, quotaR, quotaK)
       }
     }
 
