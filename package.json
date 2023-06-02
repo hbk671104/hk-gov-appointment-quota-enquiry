@@ -1,0 +1,16 @@
+{
+  "name": "hk-gov-appointment-quota-enquiry",
+  "version": "0.0.1",
+  "type": "module",
+  "description": "Hard to find a spot, so I built this.",
+  "dependencies": {
+    "crawlee": "^3.0.0",
+    "playwright": "*"
+  },
+  "scripts": {
+    "start": "node src/main.js",
+    "test": "echo \"Error: oops, the actor has no tests yet, sad!\" && exit 1"
+  },
+  "author": "Bokang Huang <hbk671104@gmail.com>",
+  "license": "ISC"
+}
