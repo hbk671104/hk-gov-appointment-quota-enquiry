@@ -46,7 +46,7 @@ const crawler = new PlaywrightCrawler({
           officeQuota.push({
             date,
             type: 'R',
-            content,
+            content: content.replace(/"/g, ''),
           })
         }
 
@@ -58,7 +58,7 @@ const crawler = new PlaywrightCrawler({
           officeQuota.push({
             date,
             type: 'K',
-            content,
+            content: content.replace(/"/g, ''),
           })
         }
       }
